@@ -7,15 +7,15 @@
 
 //APB
 
-
 //CDC
-
 
 //Dekoder
 
 //MUX'y
+//MUX_DEKODER
 
-//RAM
+//MUX_CDC_wsp
+
+//RAM (tutaj jest jeszcze ten AND - ale może bez niego?)
 
 //Rejestry sterujace
-

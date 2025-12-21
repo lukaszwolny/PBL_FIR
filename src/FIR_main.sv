@@ -6,17 +6,14 @@
 
 //FSM
 
-
 //Licznik
 
 //Licznik petli  
 
 //Shift R
 
-
 //Acc
 
 //sumator
 
 //mnozenie
-

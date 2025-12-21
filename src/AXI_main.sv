@@ -5,11 +5,11 @@
 
 //AXI
 
-
 //MUX'y
+//MUX_AXI_wej
 
+//MUX_AXI_wyj
 
 //RAM (wej)
-
 
 //RAM (wyj)
