@@ -95,7 +95,7 @@ module AXI_main_tb;
         bready = 0;
         awvalid = 0; wvalid = 0;
         awaddr = 0; awlen = 0; awsize = 2'b01; awburst = 2'b01;
-        wdata = 0; wstrb = 2'b11; wlast = 0;
+        wdata = 0; wstrb = 2'b01; wlast = 0;
         #20;
         awaddr = 16'hxxxx; awlen = 1'bx; awsize = 2'bxx; awburst = 2'bxx;
         a_rst_n = 1;
@@ -125,7 +125,7 @@ module AXI_main_tb;
         #40;
 
         wdata = 16'hABCD; 
-        wstrb = 2'b11; 
+        //wstrb = 2'b01; 
         wvalid = 1; 
         wlast = 0; //;0
         $display("dana A. %t, %b",$time ,uut.RAM_wej.pamiec_RAM[16'h0A]);

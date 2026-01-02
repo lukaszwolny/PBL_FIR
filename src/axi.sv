@@ -105,8 +105,8 @@ fsm_odczyt next_state_r;
 //kanaly ----------------------------------
 //Zapis  //adres,data,resp
 /*
-strob do zrobienia
-bresp coś z tym też?
+bresp coś z tym też?(ogolnie odpowiedzi)
+co z tym size?
 awburst_reg wersje różne
 if(wlast) dodać || licznik brursta do zera.
 */
@@ -131,7 +131,11 @@ always @(posedge a_clk) begin
         //Dostep do RAM - ZAPIS
         a_wr <= ram_wr_r;
         a_address_wr <= ram_addr_r;//ram_addr_r;  awaddr_reg
-        a_data_out <= ram_data_r;
+        //strobe
+        //a_data_out <= ram_data_r;
+        a_data_out <= '0;
+        if(wstrb[0]) a_data_out[7:0] <= ram_data_r[7:0];
+        if(wstrb[1]) a_data_out[15:8] <= ram_data_r[15:8];
 
         if(next_state_w == w_DATA_handshake) begin
             awaddr_reg <= awaddr;// - 1'b1;  // zapisz adres
