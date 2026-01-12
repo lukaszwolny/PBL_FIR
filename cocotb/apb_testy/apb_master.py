@@ -1,5 +1,6 @@
 from cocotb.triggers import RisingEdge
 
+from cocotb.triggers import Timer
 
 class APBMaster:
     def __init__(self, dut):
@@ -38,11 +39,12 @@ class APBMaster:
         # ACCESS
         dut.PENABLE.value = 1
         await RisingEdge(dut.PCLK)
-
-        data = int(dut.PRDATA.value)
-
+        
         # IDLE
         dut.PSELx.value   = 0
         dut.PENABLE.value = 0
+
+        await Timer(1, "ns") #czekaj na ustabilizowanie się PRDATA
+        data = int(dut.PRDATA.value)
 
         return data
