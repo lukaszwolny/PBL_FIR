@@ -21,7 +21,7 @@ module acc_module (
             // reset akumulatora
             if (FSM_reset_Acc)
                 Acc_out <= 21'd0;
-            // inkrementacja akumulatora jeśli włączony
+            // inkrementacja akumulatora jeśli włączony / poprostu zapis
             else if (FSM_Acc_en)
                 Acc_out <= Acc_out + suma_wynik;
 

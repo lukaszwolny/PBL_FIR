@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module fsm_fir (
+module fsm (
     input  logic clk,
     input  logic rst_n,
 
@@ -10,8 +10,6 @@ module fsm_fir (
     output logic pracuje,
     output logic DONE,
 
-    // ===== DEBUG =====
-    output logic [2:0] dbg_state,
 
     // ===== MUX =====
     output logic FSM_MUX_wyj,
@@ -42,21 +40,16 @@ module fsm_fir (
 
     typedef enum logic [2:0] {
         IDLE        = 3'd0,
-        INIT        = 3'd1,
-        LOAD_SAMPLE = 3'd2,
-        MAC_LOOP    = 3'd3,
-        NEXT_SAMPLE = 3'd4,
-        DONE_STATE  = 3'd5
+        START_S        = 3'd1,
+        A = 3'd2,
+        B    = 3'd3,
+        C = 3'd4,
+        D  = 3'd5,
+      	KONIEC = 3'd6
     } state_t;
 
     state_t state, next_state;
-
-    // DEBUG
-    assign dbg_state = state;
-
-    // ===============================
-    // Rejestr stanu
-    // ===============================
+ 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             state <= IDLE;
@@ -72,27 +65,28 @@ module fsm_fir (
 
         case (state)
             IDLE:
-                if (START) next_state = INIT;
+              if (START) next_state = START_S;
 
-            INIT:
-                next_state = LOAD_SAMPLE;
+            START_S:
+                next_state = A;
 
-            LOAD_SAMPLE:
-                next_state = MAC_LOOP;
+            A:
+                next_state = B;
 
-            MAC_LOOP:
+            B:
                 if (Petla_full)
-                    next_state = NEXT_SAMPLE;
+                    next_state = C;
 
-            NEXT_SAMPLE:
-                if (Licznik_full)
-                    next_state = DONE_STATE;
-                else
-                    next_state = LOAD_SAMPLE;
+            C: 
+                    next_state = D; 
 
-            DONE_STATE:
-                if (!START)
-                    next_state = IDLE;
+            D:
+              if (Licznik_full)
+                    next_state = KONIEC;
+          	else 
+              next_state = A;
+          
+          	KONIEC: next_state = IDLE;
         endcase
     end
 
@@ -101,7 +95,7 @@ module fsm_fir (
     // ===============================
     always_comb begin
         pracuje = 0;
-        DONE    = 0;
+      DONE    = 0;
 
         FSM_MUX_wyj = 0;
         FSM_MUX_wej = 0;
@@ -123,38 +117,50 @@ module fsm_fir (
         FSM_reset_Acc      = 0;
 
         case (state)
-            INIT: begin
+            IDLE: begin
+                pracuje = 0;
+                FSM_MUX_CDC   = 0;
+                FSM_MUX_wej = 0;
+                FSM_MUX_wyj   = 0;
+            end
+
+            START_S: begin
                 pracuje = 1;
-                FSM_reset_petla   = 1;
+                FSM_MUX_CDC = 1;
+                FSM_MUX_wej = 1;
+                FSM_MUX_wyj = 1;
+              	FSM_zapisz_probki = 1;
                 FSM_reset_licznik = 1;
-                FSM_reset_shift   = 1;
-                FSM_reset_Acc     = 1;
-                FSM_zapisz_wsp    = 1;
-                FSM_zapisz_probki = 1;
-            end
-
-            LOAD_SAMPLE: begin
-                pracuje = 1;
-                FSM_nowa_shift = 1;
-                FSM_reset_petla = 1;
+                FSM_zapisz_wsp = 1;
+              	FSM_reset_petla = 1;
                 FSM_reset_Acc = 1;
+                FSM_reset_shift = 1;
             end
 
-            MAC_LOOP: begin
-                pracuje = 1;
-                FSM_petla_en = 1;
-                FSM_Acc_en   = 1;
-                FSM_MUX_CDC  = 1;
+            A: begin
+                FSM_nowa_shift = 1;
+                FSM_reset_petla = 1; 
             end
 
-            NEXT_SAMPLE: begin
-                pracuje = 1;
-                FSM_Acc_zapisz  = 1;
-                FSM_nowa_probka = 1;
+            B: begin 
+                FSM_petla_en  = 1;
+                FSM_Acc_en = 1;
             end
 
-            DONE_STATE: begin
+            C: begin
+                FSM_petla_en = 0;
+              	FSM_Acc_en = 0;
+              	FSM_Acc_zapisz = 1;
+            end
+          
+          	D: begin
+                FSM_reset_Acc = 0;
+              	FSM_nowa_probka = 0; 
+            end
+          
+           	KONIEC: begin
                 DONE = 1;
+              	pracuje = 0; 
             end
         endcase
     end
