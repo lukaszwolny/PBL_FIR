@@ -48,6 +48,25 @@ logic [15:0] shift_out;      // IN
 logic [15:0] wsp_data;           // IN
 logic [31:0] mnozenie_wynik;   //[31:0] 
 logic [20:0] fir_probka_wynik;
+
+
+logic [5:0] wsp;
+wire [4:0] adres;
+
+
+licznik_petli u_licznik_petla(
+    .clk(clk),
+    .rst_n(rst_n),
+    .reset_petla(FSM_reset_petla),
+    .petla_en(FSM_petla_en),
+    .zapisz_wsp(FSM_zapisz_probki),
+    .wsp(wsp),
+    .full(Petla_full),
+    .adres(adres)
+);
+
+
+
 //acc
 acc_module u_acc(
     .clk_b(clk),
@@ -127,11 +146,11 @@ initial begin
     mnozenie_wynik_adder = 0;
     shift_out = 0;
     wsp_data = 0;
-
+    wsp = 3;
     rst_n = 0;
     START = 0;
     Licznik_full = 0;
-    Petla_full = 0;
+    // Petla_full = 0;
     #10;
     shift_out = 16'b0100000000000000;  //1/4   -1/4  16'b1111000000000000;   16'b0010000000000000;
     wsp_data = 16'b0100000000000000;   //1/2  -1/2
@@ -155,17 +174,17 @@ initial begin
     shift_out = 16'b0010000000000000;;  //1/4
     wsp_data = 16'b0100000000000000;   //1/2
     #10; //petla sie robi iles razy (licznik petla)
-    Petla_full = 1;
+    // Petla_full = 1;
     Licznik_full = 1;
 
     $display("suma wynik, %b", suma_wynik[15:0]);
     #20; //po 2 jest reset licznika petli
-    Petla_full = 0;
+    // Petla_full = 0;
     #10;
     //znowu acc enable
 
     #30;
-    Petla_full = 1;
+    // Petla_full = 1;
     Licznik_full = 1;
 //=============================================
 //Liczby w u2
