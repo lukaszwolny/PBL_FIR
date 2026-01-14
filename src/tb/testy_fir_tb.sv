@@ -39,17 +39,40 @@ logic FSM_Acc_en;
 logic FSM_Acc_zapisz;
 logic FSM_reset_Acc;
 
-logic [15:0] mnozenie_wynik;
-logic [15:0] Acc_out;
-logic [15:0] suma_wynik;
-localparam WIDTH = 16;
+logic [15:0] mnozenie_wynik_adder;
+logic [20:0] Acc_out;
+logic [20:0] suma_wynik;
+localparam WIDTH = 21;
+
+logic [15:0] shift_out;      // IN
+logic [15:0] wsp_data;           // IN
+logic [31:0] mnozenie_wynik;   //[31:0] 
+logic [20:0] fir_probka_wynik;
+//acc
+acc_module u_acc(
+    .clk_b(clk),
+    .rst_n(rst_n),
+    .FSM_Acc_en(FSM_Acc_en),       // włączenie Acc
+    .FSM_Acc_zapis(FSM_Acc_zapisz),    // zapisz wartość do FIR_probka_wynik
+    .FSM_reset_Acc(FSM_reset_Acc),    // reset Acc
+    .suma_wynik(suma_wynik),      // nowa wartość do dodania
+    .Acc_out(Acc_out),         // aktualna wartość akumulatora
+    .FIR_probka_wynik(fir_probka_wynik) // wynik do wyjścia
+);
+
 //dod
 adder #(
     .WIDTH(WIDTH)   // >16 bitów
 ) u_adder (
-    .mnozenie_wynik(mnozenie_wynik),// IN
-    .Acc_out(Acc_out),         // IN
+    .mnozenie_wynik(mnozenie_wynik[30:15]),// IN  mnozenie_wynik[31:16]           31:0   31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 .. 0
+    .Acc_out(Acc_out),         // IN 
     .suma_wynik(suma_wynik)        // OUT 
+);
+
+multiplier u_multiplier (
+    .shift_out(shift_out),        // IN
+    .wsp_data(wsp_data),           // IN
+    .mnozenie_wynik(mnozenie_wynik)      // OUT (>16)
 );
 
 fsm u_fsm (
@@ -100,14 +123,18 @@ initial begin
 end
 
 initial begin
-    Acc_out = 0;
-    mnozenie_wynik = 0;
+    //Acc_out = 0;
+    mnozenie_wynik_adder = 0;
+    shift_out = 0;
+    wsp_data = 0;
 
     rst_n = 0;
     START = 0;
     Licznik_full = 0;
     Petla_full = 0;
     #10;
+    shift_out = 16'b0100000000000000;  //1/4   -1/4  16'b1111000000000000;   16'b0010000000000000;
+    wsp_data = 16'b0100000000000000;   //1/2  -1/2
     rst_n = 1;
     #40;
     //testg
@@ -116,17 +143,45 @@ initial begin
     #10;
     START = 0; //czyli w apb proramista musi wyzerowac potem ten START. odpalil raz potem ustawia start na 0.
     //albo u nas to sie dzieje jakos...
-    #40; //petla sie robi iles razy (licznik petla)
-    Petla_full = 1;
-    #20; //po 2 jest reset licznika petli
-    Petla_full = 0;
-    #30;
+    #10;
+    //start obliczen
+    shift_out = 16'b1100000000000000;   //1/4 16'b0010000000000000;    -1/4  16'b1111000000000000; 
+    wsp_data = 16'b0100000000000000;   //1/2
+    $display("trestS, %b", mnozenie_wynik);
+    #10;
+    shift_out = 16'b0100000000000000;  //1/4  16'b0000000000000000;
+    wsp_data = 16'b0100000000000000;   //1/2
+    #10;
+    shift_out = 16'b0010000000000000;;  //1/4
+    wsp_data = 16'b0100000000000000;   //1/2
+    #10; //petla sie robi iles razy (licznik petla)
     Petla_full = 1;
     Licznik_full = 1;
 
+    $display("suma wynik, %b", suma_wynik[15:0]);
+    #20; //po 2 jest reset licznika petli
+    Petla_full = 0;
+    #10;
+    //znowu acc enable
+
+    #30;
+    Petla_full = 1;
+    Licznik_full = 1;
+//=============================================
+//Liczby w u2
+//16 bitow
+//-1, 1/2, 1/4, 1/8, 1/16, 1/32, 1/64, 1/128,...
+
     #100;
-    Acc_out = 100;
-    mnozenie_wynik = 50;
+    //mno
+    shift_out = 16'b0010000000000000;  
+    wsp_data = 16'b0100000000000000;
+
+    //dod
+    //Acc_out = 21'b000000100000000000000;
+    // $display("suma wynik, %b", suma_wynik);
+    #10;
+
 
 
     #500;
