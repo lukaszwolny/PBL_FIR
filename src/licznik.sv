@@ -7,7 +7,7 @@ module counter_module (
     input         FSM_zapisz_probki, // ustaw max licznik
     input         FSM_reset_licznik, // reset licznika
     input         FSM_nowa_probka,   // inkrementacja licznika
-
+    //tutaj ile wsp jeszce
     output reg [12:0] A_probki_FIR,  // aktualny adres próbki
     output reg        licznik_full    // flaga osiągnięcia max
 );

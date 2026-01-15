@@ -1,5 +1,5 @@
 
-
+// iverilog -g2012 -o testy_fir_tb.vvp ../fsm.sv ../multiplier.sv ../adder.sv ../licznik_petli.sv ../licznik.sv ../acc.sv testy_fir_tb.sv
 module testy_fir_tb;
 
 logic clk;
