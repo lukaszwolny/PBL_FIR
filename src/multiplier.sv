@@ -1,7 +1,7 @@
-module multiplier ( 
-    input  logic [15:0] shift_out,        // IN
-    input  logic [15:0] wsp_data,           // IN
-    output logic [15:0] mnozenie_wynik      // OUT (>16) 
+module multiplier (
+    input signed [15:0] shift_out,        // IN
+    input signed [15:0] wsp_data,           // IN
+    output logic [31:0] mnozenie_wynik      // OUT (>16)  [31:0]
 );
 
     always_comb begin

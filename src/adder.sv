@@ -1,4 +1,3 @@
-
 module adder #(
     parameter WIDTH = 21   // >16 bitów
 )(
