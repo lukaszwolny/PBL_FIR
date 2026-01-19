@@ -19,11 +19,16 @@ module acc_module (
             FIR_probka_wynik <= 21'd0;
         end else begin
             // reset akumulatora
-            if (FSM_reset_Acc)
+            if (FSM_reset_Acc) begin
                 Acc_out <= 21'd0;
-            else if (FSM_Acc_zapis)
+                FIR_probka_wynik <= 21'd0;
+            end else if(FSM_Acc_en) begin
+                Acc_out <= suma_wynik;
+            end else if (FSM_Acc_zapis)
                 FIR_probka_wynik <= Acc_out;
         end
     end
+
+    // assign FIR_probka_wynik = Acc_out;
 
 endmodule

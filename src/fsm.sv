@@ -43,11 +43,22 @@ module fsm (
         IDLE        = 3'd0,
         START_S        = 3'd1,
         A = 3'd2,
-        B    = 3'd3,
-        C = 3'd4,
-        D  = 3'd5,
-      	KONIEC = 3'd6
+        A_2 = 3'd3,
+        B    = 3'd4,
+        C = 3'd5,
+        D  = 3'd6,
+      	KONIEC = 3'd7
     } state_t;
+
+    // typedef enum logic [2:0] {
+    //     IDLE        = 3'd0,
+    //     START_S        = 3'd1,
+    //     A = 3'd2,
+    //     B    = 3'd3,
+    //     C = 3'd4,
+    //     D  = 3'd5,
+    //   	KONIEC = 3'd6
+    // } state_t;
 
     state_t state, next_state;
  
@@ -72,6 +83,9 @@ module fsm (
                 next_state = A;
 
             A:
+                next_state = A_2;//next_state = B;
+
+            A_2:
                 next_state = B;
 
             B:
@@ -95,12 +109,19 @@ module fsm (
     // Wyjścia FSM
     // ===============================
     always_comb begin
-        pracuje = 0;
+        //pracuje zawsze 1 - bo pracuje tylko w IDLE jest =0 bo czeka i nie pracuje
+        pracuje = 1;
+        // pracuje = 0;
         DONE    = 0;
 
-        FSM_MUX_wyj = 0;
-        FSM_MUX_wej = 0;
-        FSM_MUX_CDC = 0;
+        //muxy - zawsze na FIR skierowane, ale w IDLE do interfejsow naszych - bo zapis 
+        FSM_MUX_wyj = 1;
+        FSM_MUX_wej = 1;
+        FSM_MUX_CDC = 1;
+        // FSM_MUX_wyj = 0;
+        // FSM_MUX_wej = 0;
+        // FSM_MUX_CDC = 0;
+
         FSM_wyj_wr = 0;
 
         FSM_zapisz_wsp     = 0;
@@ -141,7 +162,12 @@ module fsm (
 
             A: begin
                 FSM_nowa_shift = 1;
-                FSM_reset_petla = 1; 
+                FSM_petla_en  = 0; //tutaj troche wczesnej  1
+                // FSM_reset_petla = 1; 
+                FSM_reset_Acc = 1; //reset tutaj
+            end
+            A_2: begin
+                FSM_petla_en  = 1; //tutaj juz enabe zeby licznik w kolejnym takcie byl juz zinkrementowany bo problem z dostepem RAM jest.. wiadomo
             end
 
             B: begin 
@@ -153,12 +179,15 @@ module fsm (
                 FSM_petla_en = 0;
               	FSM_Acc_en = 0;
               	FSM_Acc_zapisz = 1;
-                FSM_wyj_wr = 1;
+                FSM_nowa_probka = 1; //tu
+                //FSM_wyj_wr = 1;
             end
           
           	D: begin
-                FSM_reset_Acc = 1;
-              	FSM_nowa_probka = 1; 
+                FSM_reset_Acc = 0;  // reset w A
+              	// FSM_nowa_probka = 1; 
+                FSM_wyj_wr = 1; //tutaj jeslibez zmiany acc
+                FSM_reset_petla = 1; 
             end
           
            	KONIEC: begin

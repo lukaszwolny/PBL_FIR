@@ -22,39 +22,44 @@ module apb (
     input  logic [15:0] p_data_back
 );
 
-    // --------------------------------------------------
-    // APB3: podstawowe przypisania
-    // --------------------------------------------------
+    logic rd_waiting; //sygnał wait-state dla odczytu
 
-    // Zawsze gotowy (brak wait-state)
-    assign PREADY = 1'b1;
-
-    // Brak błędów slave
-    assign PSLVERR = 1'b0;
+    assign PSLVERR = 1'b0; // Brak błędów slave
 
     always_ff @(posedge PCLK or negedge PRESETn) begin
         if (!PRESETn) begin
             PRDATA    <= 32'b0;
+            PREADY    <= 1'b0;
             p_address <= 6'b0;
             p_data    <= 16'b0;
             p_wr      <= 1'b0;
+
+            rd_waiting   <= 1'b1;
         end else begin
-            p_wr <= 1'b0; // domyślnie 0 (impuls)
+            p_wr   <= 1'b0; // domyślnie 0 (impuls)
+            PREADY <= 1'b0;
 
             // SETUP phase – zapamiętaj adres
             if (PSELx && !PENABLE) begin
-                p_address <= PADDR[7:2];
+                p_address <= PADDR[5:0];
+                $display("APB: p_address=%d", p_address);
             end
 
             // WRITE
             if (PSELx && PENABLE && PWRITE) begin
                 p_data <= PWDATA[15:0];
                 p_wr   <= 1'b1;
+                PREADY <= 1'b1;
             end
 
-            // READ
-            if (PSELx && PENABLE && !PWRITE) begin
+            // READ (z wait state)
+            if (PSELx && PENABLE && !PWRITE && rd_waiting) begin
+                PREADY <= 1'b0; //niegotowy
+                rd_waiting <= 1'b0;
+            end else if (PSELx && PENABLE && !PWRITE && !rd_waiting) begin
+                PREADY <= 1'b1; //gotowy
                 PRDATA <= {16'b0, p_data_back};
+                rd_waiting <= 1'b1;
             end
         end
     end

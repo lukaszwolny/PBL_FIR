@@ -34,7 +34,7 @@ async def apb_basic_write_test(dut):
 
     # losowy adres 6-bitow, PADDR[7:2]
     random_adr = random.randint(0, 63)
-    adr = random_adr << 2  # przesun na odpowiednie bity w PADDR
+    adr = random_adr # przesun na odpowiednie bity w PADDR
 
     #losowe dane 16-bitow
     random_value = random.randint(0x0000, 0xFFFF)
@@ -46,14 +46,14 @@ async def apb_basic_write_test(dut):
     await Timer(1, "ns") # #czekaj na ustabilizowanie się sygnałów po cyklu zapisu (Opóźnienie 1ns (jak #1 w Verilog))
     assert dut.p_wr.value == 1
     dut._log.info(f"p_address: {dut.p_address.value}, expected: {random_adr}")
-    assert dut.p_address.value == adr >> 2
+    assert dut.p_address.value == adr
     assert dut.p_data.value == random_value
 
     await RisingEdge(dut.PCLK)
 
     await Timer(1, "ns")
     assert dut.p_wr.value == 0 #impuls zapisu powinien się wyzerować
-    assert dut.p_address.value == adr >> 2
+    assert dut.p_address.value == adr
     assert dut.p_data.value == random_value
 
 @cocotb.test()
