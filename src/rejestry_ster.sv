@@ -12,7 +12,10 @@ module ctrl_registers (
     input             Pracuje,
     input             DONE,
     output reg [5:0]  Ile_wsp,
-    output reg [13:0] Ile_probek
+    output reg [13:0] Ile_probek,
+
+    //ile razy to ma sie robic
+    output reg [14:0] ile_razy
 );
 
     reg [15:0] rej [0:4]; // 5 rejestrów: 0=START,1=DONE,2=PRACUJE,3=ile_wsp,4=ile_probek
@@ -21,6 +24,7 @@ module ctrl_registers (
 
     always @(posedge clk_b or negedge rst_n) begin
         if (!rst_n) begin
+            ile_razy <= '0;
             Start      <= 1'b0;
             Ile_wsp    <= 6'd0;
             Ile_probek <= 14'd0;
@@ -45,6 +49,9 @@ module ctrl_registers (
             Start      <= rej[0][0];     // START sygnał 1-bit
             Ile_wsp    <= rej[3][5:0];   // 6-bit
             Ile_probek <= rej[4][13:0];  // 14-bit
+            ile_razy <= (rej[3][5:0] || rej[4][13:0]) ? (rej[3][5:0] + rej[4][13:0]) - 1'b1 : '0;  //M+N-1
+
+            //Moze jak jest pracuje=1 to uniemożliwic zapis? - ile_probek i ile_wsp
 
             //Tutaj chyba musi byc cos takiego ze jak dostaniemy START = 1 to w kolejnym takcie go resetujemy?
             // if(Start) begin

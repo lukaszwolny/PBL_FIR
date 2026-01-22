@@ -10,6 +10,7 @@ module FIR_main(
     input wire rst_n,
     input wire [5:0] f_ile_wsp,
     input wire [13:0] f_ile_probek,
+    input wire [14:0] f_ile_razy,
     input wire [15:0] f_wsp_data,
     input wire f_start,
     input wire [15:0] f_probka,
@@ -82,7 +83,8 @@ fsm u_fsm (
 counter_module u_counter_module (
     .clk_b(clk),
     .rst_n(rst_n),
-    .ile_probek(f_ile_probek),
+    // .ile_probek(f_ile_probek),
+    .ile_razy(f_ile_razy),
     .FSM_zapisz_probki(FSM_zapisz_probki),
     .FSM_reset_licznik(FSM_reset_licznik), 
     .FSM_nowa_probka(FSM_nowa_probka), 
@@ -106,6 +108,7 @@ licznik_petli u_licznik_petla(
 shift_R u_shift(
     .clk(clk),
     .rst_n(rst_n),
+    .ile_probek(f_ile_probek),
     .probka_in(f_probka),
     .out(shift_out),
     .nowa_shift(FSM_nowa_shift),
