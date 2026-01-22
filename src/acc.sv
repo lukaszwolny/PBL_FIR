@@ -10,7 +10,8 @@ module acc_module (
     input  [20:0] suma_wynik,      // nowa wartość do dodania
 
     output reg [20:0] Acc_out,         // aktualna wartość akumulatora
-    output reg [20:0] FIR_probka_wynik // wynik do wyjścia
+    output reg [15:0] FIR_probka_wynik // wynik do wyjścia
+    // output reg [20:0] FIR_probka_wynik
 );
 
     always @(posedge clk_b or negedge rst_n) begin
@@ -25,7 +26,8 @@ module acc_module (
             end else if(FSM_Acc_en) begin
                 Acc_out <= suma_wynik;
             end else if (FSM_Acc_zapis)
-                FIR_probka_wynik <= Acc_out;
+                FIR_probka_wynik <= Acc_out[15:0];
+                // FIR_probka_wynik <= Acc_out;
         end
     end
 

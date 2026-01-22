@@ -17,7 +17,8 @@ logic f_done;
 logic [12:0] f_a_probki_fir;
 logic f_fsm_mux_wej;
 logic f_fsm_mux_wyj;
-logic [20:0] f_fir_probka_wynik;
+logic [15:0] f_fir_probka_wynik;
+// logic [20:0] f_fir_probka_wynik;
 logic f_fsm_wyj_wr;
 logic [14:0] f_ile_razy; 
 
@@ -71,7 +72,8 @@ ram #(
     .clk(clk),
     .wr(f_fsm_wyj_wr),//wr_mem
     .adres(f_a_probki_fir),//adres
-    .data(f_fir_probka_wynik[15:0]),
+    .data(f_fir_probka_wynik),
+    // .data(f_fir_probka_wynik[15:0]),
     .data_out(meh)
 );
 
@@ -190,19 +192,36 @@ initial begin
     // probk_ram.pamiec_RAM[4] = 16'hxxxx;
 
 //5. usrednianie
+    // f_ile_wsp = 2; //ile wsp
+    // wsp_ram.pamiec_RAM[0] = 16'b0100_0000_0000_0000;  //16384  
+    // wsp_ram.pamiec_RAM[1] = 16'b0100_0000_0000_0000;  //16384
+    // wsp_ram.pamiec_RAM[2] = 16'b0000000000000000;
+    // f_ile_probek = 4; // ile probek
+    // f_ile_razy = f_ile_wsp + f_ile_probek - 1;
+    // probk_ram.pamiec_RAM[0] = 16'b1111_1100_0001_1000;  //-1000
+    // probk_ram.pamiec_RAM[1] = 16'b1111_1000_0011_0000;     //-2000
+    // probk_ram.pamiec_RAM[2] = 16'b1111_0100_0100_1000;    //-3000
+    // probk_ram.pamiec_RAM[3] = 16'b1111_0000_0110_0000;    //-4000
+
+    // wsp_ram.pamiec_RAM[3] = 16'b1111111111111111;
+    // probk_ram.pamiec_RAM[4] = 16'hxxxx;
+
+//5 rozniczka
     f_ile_wsp = 2; //ile wsp
-    wsp_ram.pamiec_RAM[0] = 16'b0100_0000_0000_0000;  //16384  
-    wsp_ram.pamiec_RAM[1] = 16'b0100_0000_0000_0000;  //16384
+    wsp_ram.pamiec_RAM[0] = 16'b0111_1111_1111_1111;  //32767
+    wsp_ram.pamiec_RAM[1] = 16'b1000_0000_0000_0000;  //-32768
     wsp_ram.pamiec_RAM[2] = 16'b0000000000000000;
-    f_ile_probek = 4; // ile probek
+    f_ile_probek = 5; // ile probek
     f_ile_razy = f_ile_wsp + f_ile_probek - 1;
-    probk_ram.pamiec_RAM[0] = 16'b1111_1100_0001_1000;  //-1000
-    probk_ram.pamiec_RAM[1] = 16'b1111_1000_0011_0000;     //-2000
-    probk_ram.pamiec_RAM[2] = 16'b1111_0100_0100_1000;    //-3000
-    probk_ram.pamiec_RAM[3] = 16'b1111_0000_0110_0000;    //-4000
+    probk_ram.pamiec_RAM[0] = 16'b0000_0011_1110_1000;  //1000
+    probk_ram.pamiec_RAM[1] = 16'b0000_0111_1101_0000;     //2000
+    probk_ram.pamiec_RAM[2] = 16'b0000_1011_1011_1000;    //3000
+    probk_ram.pamiec_RAM[3] = 16'b0000_0111_1101_0000;   //2000
+    probk_ram.pamiec_RAM[4] = 16'b0000_0011_1110_1000;   //1000
 
     wsp_ram.pamiec_RAM[3] = 16'b1111111111111111;
-    probk_ram.pamiec_RAM[4] = 16'hxxxx;
+    probk_ram.pamiec_RAM[5] = 16'hxxxx;
+
 
 //======================================================
     

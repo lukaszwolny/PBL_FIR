@@ -21,7 +21,8 @@ module FIR_main(
     output logic [12:0] f_a_probki_fir,
     output logic f_fsm_mux_wej,
     output logic f_fsm_mux_wyj,
-    output logic [20:0] f_fir_probka_wynik,
+    output logic [15:0] f_fir_probka_wynik,
+    // output logic [20:0] f_fir_probka_wynik,
     output logic f_fsm_wyj_wr
 );
 //------------------------
