@@ -57,9 +57,14 @@ module AXI_main(
     input wire a_rready,
     output logic a_rlast,
     output logic [63:0] a_rdata,
-    output logic [1:0] a_rresp
-    //sygnały z FSM(z FIR'a) jeszcze tu beda
-
+    output logic [1:0] a_rresp,
+    //sygnały z FIR
+    output logic [15:0] a_probka,
+    input wire a_fsm_mux_wej,
+    input wire a_fsm_mux_wyj,
+    input wire a_fsm_wyj_wr,
+    input wire [12:0] a_adres_probki_fir,
+    input wire [15:0] a_fir_probka_wynik
 );
 
 //Parametry
@@ -91,27 +96,26 @@ wire [Data_size_out-1:0] axi_probka;
 wire [Address_size_out2-1:0] axi_address_odczytu;
 wire [Data_size_in-1:0] axi_data_in;
 
-wire [Szerokosc_mux_wej-1:0] Adres_probki_FIR;//(A_probki_FIR)
-wire sel_FSM_mux_wej;
+// wire [Szerokosc_mux_wej-1:0] Adres_probki_FIR;//(A_probki_FIR)
+// wire sel_FSM_mux_wej;
 wire [Szerokosc_mux_wej-1:0] probka_address_in;
-
 wire [Szerokosc_mux_wyj-1:0] probka_address_out;
-wire sel_FSM_mux_wyj;
+// wire sel_FSM_mux_wyj;
 
-wire in_FSM_wyj_wr;
-wire [Data_size_in-1:0] in_FIR_probka_wynik;
+// wire in_FSM_wyj_wr;
+// wire [Data_size_in-1:0] in_FIR_probka_wynik;
 
 //---
 //TESTOWE do usuniecia
-    //TESTY
-wire [1:0] state_w_out;
 
-assign sel_FSM_mux_wej = 1'b0;
-assign Adres_probki_FIR = '0;
-assign sel_FSM_mux_wyj = 1'b0;
-assign in_FSM_wyj_wr = 1'b0;
-assign in_FIR_probka_wynik = '0;
+// assign sel_FSM_mux_wej = 1'b0;
+// assign Adres_probki_FIR = '0;
+// assign sel_FSM_mux_wyj = 1'b0;
+// assign in_FSM_wyj_wr = 1'b0;
+// assign in_FIR_probka_wynik = '0;
 //---
+
+assign a_probka = axi_probka;
 
 //AXI
 axi #(
@@ -162,18 +166,18 @@ axi #(
 multiplekser #(
     .WIDTH(Szerokosc_mux_wej)
 ) mux_axi_wej (
-    .data_a(Adres_probki_FIR),//z FSM
+    .data_a(a_adres_probki_fir),//z FSM
     .data_b(axi_adres_zapisu),//z axi
-    .sel(sel_FSM_mux_wej),
+    .sel(a_fsm_mux_wej),
     .data_out(probka_address_in)
 );
 //MUX_AXI_wyj
 multiplekser #(
     .WIDTH(Szerokosc_mux_wyj)
 ) mux_axi_wyj (
-    .data_a(Adres_probki_FIR),//z FSM
+    .data_a(a_adres_probki_fir),//z FSM
     .data_b(axi_address_odczytu),//z axi
-    .sel(sel_FSM_mux_wyj),
+    .sel(a_fsm_mux_wyj),
     .data_out(probka_address_out)
 );
 
@@ -196,8 +200,8 @@ ram #(
 ) RAM_wyj (
     .clk(a_clk),
     .adres(probka_address_out),
-    .data(in_FIR_probka_wynik),
-    .wr(in_FSM_wyj_wr),
+    .data(a_fir_probka_wynik),
+    .wr(a_fsm_wyj_wr),
     .data_out(axi_data_in)//axi_probka też potem do FIR idzie.
 );
 

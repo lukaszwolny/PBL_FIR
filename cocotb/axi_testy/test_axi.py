@@ -20,6 +20,13 @@ async def axi_test_1(dut):
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
 
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
+
     dut.a_rst_n.value = 0
     for _ in range(5):
         await RisingEdge(dut.a_clk)
@@ -52,6 +59,13 @@ async def axi_test_2(dut):
     # Zapis pojedynczej losowej probki pod losowy adres do RAM wej i odczyt jej
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
+
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
 
     dut.a_rst_n.value = 0
     for _ in range(5):
@@ -91,6 +105,13 @@ async def axi_test_3(dut):
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
 
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
+
     dut.a_rst_n.value = 0
     for _ in range(5):
         await RisingEdge(dut.a_clk)
@@ -126,6 +147,13 @@ async def axi_test_4(dut):
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
 
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
+
     dut.a_rst_n.value = 0
     for _ in range(5):
         await RisingEdge(dut.a_clk)
@@ -160,6 +188,13 @@ async def axi_test_5(dut):
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
 
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
+
     dut.a_rst_n.value = 0
     for _ in range(5):
         await RisingEdge(dut.a_clk)
@@ -191,6 +226,13 @@ async def axi_test_6(dut):
     # testy calego axi. zapis probki spr tej probki i odczyt wyniku
 
     cocotb.start_soon(Clock(dut.a_clk, 10, units="ns").start())
+
+    #z FIR'a
+    dut.a_fsm_mux_wej.value = 0
+    dut.a_fsm_mux_wyj.value = 0
+    dut.a_fsm_wyj_wr.value = 0
+    dut.a_adres_probki_fir.value = 0
+    dut.a_fir_probka_wynik.value = 0
 
     dut.a_rst_n.value = 0
     for _ in range(5):
