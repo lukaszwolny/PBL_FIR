@@ -43,7 +43,23 @@ module pbl_TOP(
 //a_clk
 //==================
 
-
+//--FIR--
+wire [5:0] ile_wsp;   //z apb
+wire [13:0] ile_probek;   // z apb
+wire [14:0] ile_razy;  //zapb
+wire [15:0] wsp_data;
+wire start; // z apb
+wire [15:0] probka; //z axi
+wire [4:0] address_fir;  //do apb
+wire fsm_mux_cdc; //do apb
+wire pracuje; //do apb
+wire done; //do apb
+wire [12:0] a_probki_fir; //do axi
+wire fsm_mux_wej; //do axi
+wire fsm_mux_wyj;//do axi
+wire [15:0] fir_probka_wynik;//do axi
+wire fsm_wyj_wr;//do axi
+//=============
 
 //APB_main
 
@@ -76,12 +92,34 @@ AXI_main u_axi(
     .a_rready(a_rready),
     .a_rlast(a_rlast),
     .a_rdata(a_rdata),
-    .a_rresp(a_rresp)
-    //sygnały z FSM(z FIR'a) jeszcze tu beda
-
+    .a_rresp(a_rresp),
+    .a_probka(probka),
+    .a_fsm_mux_wej(fsm_mux_wej),
+    .a_fsm_mux_wyj(fsm_mux_wyj),
+    .a_fsm_wyj_wr(fsm_wyj_wr),
+    .a_adres_probki_fir(a_probki_fir),
+    .a_fir_probka_wynik(fir_probka_wynik)
 );
 
 //FIR_main
-
+FIR_main u_fir(
+    .clk(a_clk),
+    .rst_n(a_rst_n),
+    .f_ile_wsp(ile_wsp),
+    .f_ile_probek(ile_probek),
+    .f_ile_razy(ile_razy),
+    .f_wsp_data(wsp_data),
+    .f_start(start),
+    .f_probka(probka),
+    .f_adress_fir(address_fir),
+    .f_fsm_mux_cdc(fsm_mux_cdc),
+    .f_pracuje(pracuje),
+    .f_done(done),
+    .f_a_probki_fir(a_probki_fir),
+    .f_fsm_mux_wej(fsm_mux_wej),
+    .f_fsm_mux_wyj(fsm_mux_wyj),
+    .f_fir_probka_wynik(fir_probka_wynik),
+    .f_fsm_wyj_wr(fsm_wyj_wr)
+);
 
 endmodule
