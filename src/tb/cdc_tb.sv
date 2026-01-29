@@ -48,10 +48,10 @@ module tb_cdc_module;
     // Zegary
     // ==============================
     initial clk_a = 0;
-    always #10 clk_a = ~clk_a;   // 100 MHz  #5
+    always #10 clk_a = ~clk_a;   // 100 MHz
 
     initial clk_b = 0;
-    always #1 clk_b = ~clk_b;   // ~71 MHz  #7
+    always #7 clk_b = ~clk_b;   // ~71 MHz
 
     // ==============================
     // Prosta pamięć (domena B)
@@ -61,19 +61,21 @@ module tb_cdc_module;
     always @(posedge clk_b) begin
         if (CDC_wr) begin
             mem[CDC_A] <= CDC_data;
-            data_back  <= CDC_data;
-        end else begin
-            data_back <= mem[CDC_A];
+            $display("[%0t] DOMENA B: ZAPIS mem[%0d] = 0x%04h", $time, CDC_A, CDC_data);
         end
+        // zawsze aktualizuj data_back dla odczytu
+        data_back <= mem[CDC_A];
     end
 
     // ==============================
-    // Deklaracje tablic testowych
+    // Zmienne testowe
     // ==============================
     reg [15:0] test_data [0:4];
     reg [5:0]  test_addr [0:4];
+    integer j;
 
     initial begin
+        // Inicjalizacja danych testowych
         test_addr[0] = 6'd1;   test_data[0] = 16'h1111;
         test_addr[1] = 6'd5;   test_data[1] = 16'hABCD;
         test_addr[2] = 6'd10;  test_data[2] = 16'h1234;
@@ -82,9 +84,9 @@ module tb_cdc_module;
     end
 
     // ==============================
-    // Task wysyłania danych
+    // Task zapisu
     // ==============================
-    task write_tx;
+    task write_data;
         input [5:0] addr;
         input [15:0] data;
         integer i;
@@ -97,22 +99,36 @@ module tb_cdc_module;
             @(posedge clk_a);
             p_wr      <= 1'b0;
 
-            // Poczekaj kilka cykli clk_b, żeby CDC przetworzyło dane
-            for (i=0; i<5; i=i+1)
-                @(posedge clk_b);
+            // Poczekaj na synchronizację (3-4 cykli clk_b = ~2 cykli clk_a)
+            #100;
+            $display("[%0t] DOMENA A: ZAPIS addr=%0d data=0x%04h", $time, addr, data);
+        end
+    endtask
 
-            $display("[%0t] WRITE OK addr=%0d data=0x%04h",
-                     $time, CDC_A, CDC_data);
+    // ==============================
+    // Task odczytu
+    // ==============================
+    task read_data;
+        input [5:0] addr;
+        integer i;
+        begin
+            @(posedge clk_a);
+            p_address <= addr;
+            p_wr      <= 1'b0;
+
+            // Poczekaj na synchronizację CDC:
+            // clk_b (2 flopy dla addr) + data_back (2 flopy do clk_a) + margines
+            // ~70-80ns bezpiecznie (8-10 cykli clk_a)
+            repeat(10) @(posedge clk_a);
+            $display("[%0t] DOMENA A: ODCZYT addr=%0d data_back=0x%04h", $time, addr, p_data_back);
         end
     endtask
 
     // ==============================
     // Test główny
     // ==============================
-    integer j;
-
     initial begin
-        // inicjalizacja
+        // Inicjalizacja
         clk_a = 0;
         clk_b = 0;
         rst_n = 0;
@@ -123,19 +139,30 @@ module tb_cdc_module;
 
         #50;
         rst_n = 1;
-        $display("[%0t] Reset released", $time);
+        $display("[%0t] ===== RESET RELEASED =====", $time);
 
-        // wykonanie wszystkich zapisów
+        #50;
+        $display("[%0t] ===== TEST ZAPISU =====", $time);
+        // Zapisz wszystkie dane testowe
         for (j=0; j<5; j=j+1) begin
-            write_tx(test_addr[j], test_data[j]);
+            write_data(test_addr[j], test_data[j]);
+            #50;
         end
 
         #100;
-        $display("=== ALL TESTS PASSED ===");
+        $display("[%0t] ===== TEST ODCZYTU =====", $time);
+        // Odczytaj wszystkie dane testowe
+        for (j=0; j<5; j=j+1) begin
+            read_data(test_addr[j]);
+            #50;
+        end
+
+        #100;
+        $display("[%0t] ===== ALL TESTS PASSED =====", $time);
         $finish;
     end
 
-        initial begin
+    initial begin
         $dumpfile("cdc_tb.vcd");
         $dumpvars(0, tb_cdc_module);
     end
