@@ -22,15 +22,43 @@ logic [15:0] f_fir_probka_wynik;
 logic f_fsm_wyj_wr;
 logic [14:0] f_ile_razy; 
 
+logic [15:0] CDC_data;
+logic [2:0]  nr_Rejestru;
+logic wr_Rej;
+logic [15:0] Rej_out;
+// logic Start;
+// logic [5:0]  Ile_wsp;
+// logic [13:0] Ile_probek;
+// logic DONE;
+// logic Pracuje;
+// logic [14:0] ile_razy
+
+//rej ster
+ctrl_registers u_ctrl_registers (
+    .clk_b(clk),
+    .rst_n(rst_n),
+    .CDC_data(CDC_data),
+    .nr_Rejestru(nr_Rejestru),
+    .wr_Rej(wr_Rej),
+    .Rej_out(Rej_out),
+    .Start(f_start),
+    .Pracuje(f_pracuje),
+    .DONE(f_done),
+    .Ile_wsp(f_ile_wsp),
+    .Ile_probek(f_ile_probek),
+    .ile_razy(f_ile_razy)
+);
+
+
 //fir
 FIR_main u_fir(
     .clk(clk),
     .rst_n(rst_n),
-    .f_ile_wsp(f_ile_wsp),
-    .f_ile_probek(f_ile_probek),
-    .f_ile_razy(f_ile_razy),
+    .f_ile_wsp(f_ile_wsp),//f_ile_wsp
+    .f_ile_probek(f_ile_probek),//f_ile_probek
+    .f_ile_razy(f_ile_razy),//f_ile_razy
     .f_wsp_data(f_wsp_data),
-    .f_start(f_start),
+    .f_start(f_start),//f_start
     .f_probka(f_probka),
     .f_adress_fir(f_adress_fir),
     .f_fsm_mux_cdc(f_fsm_mux_cdc),
@@ -207,12 +235,12 @@ initial begin
     // probk_ram.pamiec_RAM[4] = 16'hxxxx;
 
 //5 rozniczka
-    f_ile_wsp = 2; //ile wsp
+    // f_ile_wsp = 2; //ile wsp
     wsp_ram.pamiec_RAM[0] = 16'b0111_1111_1111_1111;  //32767
     wsp_ram.pamiec_RAM[1] = 16'b1000_0000_0000_0000;  //-32768
     wsp_ram.pamiec_RAM[2] = 16'b0000000000000000;
-    f_ile_probek = 5; // ile probek
-    f_ile_razy = f_ile_wsp + f_ile_probek - 1;
+    // f_ile_probek = 5; // ile probek
+    // f_ile_razy = f_ile_wsp + f_ile_probek - 1;
     probk_ram.pamiec_RAM[0] = 16'b0000_0011_1110_1000;  //1000
     probk_ram.pamiec_RAM[1] = 16'b0000_0111_1101_0000;     //2000
     probk_ram.pamiec_RAM[2] = 16'b0000_1011_1011_1000;    //3000
@@ -227,13 +255,51 @@ initial begin
     
     // f_ile_probek = 3; // ile probek
     rst_n = 0;
-    f_start = 0;
+    // f_start = 0;
+    CDC_data = 0;
+    nr_Rejestru = 0;
+    wr_Rej = 0;
     #10;
     rst_n = 1;
     #40;
-    f_start = 1;
+    //ile wsp
+    CDC_data = 2;
+    nr_Rejestru = 3;
+    wr_Rej = 1;
     #10;
-    f_start = 1;
+    wr_Rej = 0;
+    #10;
+    //ile_probek
+    CDC_data = 5;
+    nr_Rejestru = 4;
+    wr_Rej = 1;
+    #10;
+    wr_Rej = 0;
+    #10;
+    //start
+    CDC_data = 1;
+    nr_Rejestru = 0;
+    wr_Rej = 1;
+    #10;
+    wr_Rej = 0;
+    #10;
+
+
+    #500;
+    //ponowny start..
+    CDC_data = 1;
+    nr_Rejestru = 0;
+    wr_Rej = 1;
+    #10;
+    wr_Rej = 0;
+    #10;
+// logic [15:0] CDC_data;
+// logic [2:0]  nr_Rejestru;
+// logic wr_Rej;
+
+    // f_start = 1;
+    // #10;
+    // f_start = 1;
 
     #10;
 

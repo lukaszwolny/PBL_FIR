@@ -27,7 +27,7 @@ always_ff @(posedge clk) begin
         end
         if(nowa_shift) begin
             //tutaj jeszcze testy progowych wartosci...
-            reg_shift <= (max_probki_licznik < ile_probek) ? {reg_shift[31:0], probka_in} : {reg_shift[31:0], 16'd0};//..  {probka_in, reg_shift[31:1]};//..
+            reg_shift <= (max_probki_licznik < ile_probek) ? {reg_shift[30:0], probka_in} : {reg_shift[30:0], 16'd0};//..  {probka_in, reg_shift[31:1]};//..
             // +  tutaj trzeba wypelniac na koniec zeramii... albo w ram wej beda zera albo tutaj cos wymyslec
             max_probki_licznik <= max_probki_licznik + 1'b1;
         end

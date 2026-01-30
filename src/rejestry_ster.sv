@@ -24,6 +24,7 @@ module ctrl_registers (
 
     always @(posedge clk_b or negedge rst_n) begin
         if (!rst_n) begin
+            done_reg <= '0;
             ile_razy <= '0;
             Start      <= 1'b0;
             Ile_wsp    <= 6'd0;
@@ -51,23 +52,19 @@ module ctrl_registers (
             Ile_probek <= rej[4][13:0];  // 14-bit
             ile_razy <= (rej[3][5:0] || rej[4][13:0]) ? (rej[3][5:0] + rej[4][13:0]) - 1'b1 : '0;  //M+N-1
 
-            //Moze jak jest pracuje=1 to uniemożliwic zapis? - ile_probek i ile_wsp
-
-            //Tutaj chyba musi byc cos takiego ze jak dostaniemy START = 1 to w kolejnym takcie go resetujemy?
-            // if(Start) begin
-            //     Start <= 1'b0;
-            // end
-            //to samo dla DONE jak fsm wystawi DONE (na 1 takt) to trzeba go zapisac. i reset jak START = 1.
-            // done_reg <= DONE;
-            // if(Start) begin
-                
-            // end
-            /* No czyli START i DONE trzeba jakos ogarnac */
+            //====================================
+            if(rej[0][0]) rej[0][0] <= 1'b0;//reset start. Dodac (.. & Pracuje) ?
+            if(done_reg) begin
+                if(rej[0][0]) done_reg <= 1'b0;//reset done, przy starcie
+            end else begin
+                done_reg <= DONE;//zapis ze fir juz skonczyl.
+            end
+            //====================================
 
             // wyjście odczytu rejestru pod nr_Rejestru
             case (nr_Rejestru)
-                3'b000: Rej_out <= {15'd0, Start};
-                3'b001: Rej_out <= {15'd0, DONE};
+                3'b000: Rej_out <= {15'd0, Start};///To sie teraz staje bez sensu wsumie...
+                3'b001: Rej_out <= {15'd0, done_reg};//  DONE
                 3'b010: Rej_out <= {15'd0, Pracuje};
                 3'b011: Rej_out <= {10'd0, Ile_wsp};
                 3'b100: Rej_out <= {2'd0, Ile_probek};

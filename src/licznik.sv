@@ -26,14 +26,17 @@ module counter_module (
                 max_ile_razy <= ile_razy; //Tutaj nie ile probek a (ile probek + ile wsp) - 1    max_probek <= ile_probek[12:0]; (albo to w rejestry_ster)
 
             // reset licznika
-            if (FSM_reset_licznik)
+            if (FSM_reset_licznik) begin
                 A_probki_FIR <= 13'd0;
+                licznik_full <= 1'b0;//reset tutaj tez
+            end
             else if (FSM_nowa_probka) begin
                 if (A_probki_FIR < max_ile_razy - 1'b1) begin   //if (A_probki_FIR < max_probek) begin  if (A_probki_FIR != max_probek - 1'b1) begin 
                     A_probki_FIR <= A_probki_FIR + 1'b1;
                     licznik_full <= 1'b0;
                 end else begin
                     licznik_full <= 1'b1;
+                    A_probki_FIR <= 13'd0;
                 end
             end
         end
