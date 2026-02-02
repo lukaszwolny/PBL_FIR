@@ -29,7 +29,10 @@ module APB_main (
     input logic DONE,
 
     output logic [5:0]  Ile_wsp,
-    output logic [13:0] Ile_probek
+    output logic [13:0] Ile_probek,
+    input logic [4:0] address_FIR,
+    output logic [14:0] Ile_razy,
+    output logic [15:0] wsp_data
 );
     
 // sygnały wewnętrzne apb <-> cdc
@@ -53,11 +56,11 @@ logic        wr_Rej;
 
 //sygnały MUX_DEKODER
 logic [15:0] Rej_out;  //sygnał z rejestrów kontrolnych
-logic [15:0] wsp_data; //sygnał z RAM współczynników
+// logic [15:0] wsp_data; //sygnał z RAM współczynników
 
 //sygnały MUX_CDC_wsp
 logic [4:0] wsp_address_in; //adres do RAM współczynników
-logic [4:0] address_FIR;    //adres z FSM
+// logic [4:0] address_FIR;    //adres z FSM
 //logic       FSM_MUX_CDC;    //sygnał z FSM do wyboru adresu
 
 //APB
@@ -79,28 +82,28 @@ apb apb0(
     .p_data_back(p_data_back)
 );
 
-// //CDC
-// cdc_module cdc_module0(
-//     clk_a     (PCLK),
-//     rst_n     (rst_n), //reset z domeny B???
+//CDC
+cdc_module cdc_module0(
+    .clk_a     (PCLK),
+    .rst_n     (rst_n), //reset z domeny B???
 
-//     .p_address (p_address),
-//     .p_data    (p_data    ),
-//     .p_wr      (p_wr      ),
-//     .p_data_back(p_data_back),
+    .p_address (p_address),
+    .p_data    (p_data    ),
+    .p_wr      (p_wr      ),
+    .p_data_back(p_data_back),
 
-//     clk_b      (clk_b),
+    .clk_b      (clk_b),
 
-//     .CDC_A     (CDC_A    ),
-//     .CDC_data  (CDC_data ),
-//     .CDC_wr    (CDC_wr   ),
-//     .data_back (data_back)
-// )
+    .CDC_A     (CDC_A    ),
+    .CDC_data  (CDC_data ),
+    .CDC_wr    (CDC_wr   ),
+    .data_back (data_back)
+);
 //  DLA TESTÓW POMIJAĆ CDC
-assign CDC_A    = p_address;
-assign CDC_data = p_data;
-assign CDC_wr   = p_wr;
-assign p_data_back = data_back;
+// assign CDC_A    = p_address;
+// assign CDC_data = p_data;
+// assign CDC_wr   = p_wr;
+// assign p_data_back = data_back;
 
 //Dekoder
 decoder decoder0(
@@ -126,9 +129,9 @@ end
 //MUX_CDC_wsp
 always_comb begin
     if(FSM_MUX_CDC) begin
-        wsp_address_in = address_RAM;
+        wsp_address_in = address_FIR;
     end else begin
-        wsp_address_in = address_FIR; 
+        wsp_address_in = address_RAM; 
     end
 end
 
@@ -158,7 +161,8 @@ ctrl_registers rejestry_ster0(
     .DONE       (DONE),
 
     .Ile_wsp    (Ile_wsp),
-    .Ile_probek (Ile_probek)
+    .Ile_probek (Ile_probek),
+    .ile_razy(Ile_razy)
 );
 
 endmodule

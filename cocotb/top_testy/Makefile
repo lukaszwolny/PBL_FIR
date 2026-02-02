@@ -14,7 +14,12 @@ VERILOG_SOURCES = \
   $(PWD)/../../src/shift_R.sv \
   $(PWD)/../../src/multiplier.sv \
   $(PWD)/../../src/adder.sv \
-  $(PWD)/../../src/acc.sv
+  $(PWD)/../../src/acc.sv \
+  $(PWD)/../../src/APB_main.sv \
+  $(PWD)/../../src/cdc.sv \
+  $(PWD)/../../src/apb.sv \
+  $(PWD)/../../src/decoder.sv \
+  $(PWD)/../../src/rejestry_ster.sv
 
 SIM = icarus
 IVERILOG_ARGS = -g2012 + vcd

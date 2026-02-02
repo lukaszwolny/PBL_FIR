@@ -30,9 +30,19 @@ module pbl_TOP(
     input wire a_rready,
     output logic a_rlast,
     output logic [63:0] a_rdata,
-    output logic [1:0] a_rresp
+    output logic [1:0] a_rresp,
     
     //apb
+    input logic apb_PCLK,
+    input logic apb_PRESETn,
+    input logic [31:0] apb_PADDR,
+    input logic apb_PSEL,
+    input logic apb_PENABLE,
+    input logic apb_PWRITE,
+    input logic [31:0] apb_PWDATA,
+    output logic apb_PREADY,
+    output logic [31:0] apb_PRDATA,
+    output logic apb_PSLVERR
 
 );
 //==================
@@ -63,7 +73,30 @@ wire fsm_wyj_wr;//do axi
 //=============
 
 //APB_main
+APB_main u_apb (
+    .PCLK(apb_PCLK),
+    .PRESETn(apb_PRESETn),
+    .PADDR(apb_PADDR),
+    .PSEL(apb_PSEL),
+    .PENABLE(apb_PENABLE),
+    .PWRITE(apb_PWRITE),
+    .PWDATA(apb_PWDATA),
+    .PREADY(apb_PREADY),
+    .PRDATA(apb_PRDATA),
+    .PSLVERR(apb_PSLVERR),
 
+    .clk_b(a_clk),
+    .rst_n(a_rst_n),
+    .FSM_MUX_CDC(fsm_mux_cdc),
+    .Start(start),
+    .pracuje(pracuje),
+    .DONE(done),
+    .Ile_wsp(ile_wsp),
+    .Ile_probek(ile_probek),
+    .address_FIR(address_fir),
+    .Ile_razy(ile_razy),
+    .wsp_data(wsp_data)
+);
 
 //AXI_main
 AXI_main u_axi(
