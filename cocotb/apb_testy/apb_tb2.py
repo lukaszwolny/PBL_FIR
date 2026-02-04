@@ -52,19 +52,9 @@ class APB_SoC_Tester:
             addr = random.randint(0, 31) # adresy RAM od 0 do 31
             data = random.randint(0, 0xFFFF)
             
-            self.dut._log.info(f"Test {i}: Zapis RAM[{addr}] = {data:#x}")
+            #self.dut._log.info(f"Test {i}: Zapis RAM[{addr}] = {data:#x}")
             await self.apb.write(addr, data)
             self.expected_ram[addr] = data
-            
-            # Ponieważ domena B jest szybsza, dane powinny być w RAM 
-            # niemal natychmiast po zakończeniu transakcji APB
-            #await RisingEdge(self.dut.clk_b)
-            #await ReadOnly()
-            
-            # Weryfikacja sygnału wyjściowego z RAM (jeśli adres się zgadza)
-            # if self.dut.wsp_address_in.value.integer == addr:
-            #     actual = self.dut.wsp_data.value.integer
-            #     assert actual == data, f"Błąd zapisu! Adr: {addr}, Jest: {actual:#x}, Ma być: {data:#x}"
 
     async def read_ram_and_verify(self):
         """Odczytuje wszystkie zapisane wcześniej adresy przez APB i weryfikuje ich zawartość"""
@@ -82,7 +72,7 @@ class APB_SoC_Tester:
                 read_val = int.from_bytes(read_data_raw, byteorder="little")
             read_val &= 0xFFFF # Maskujemy do 16 bitów (szerokość Twojej pamięci)
             
-            self.dut._log.info(f"Odczyt RAM[{addr:#x}] = {read_val:#x} (Oczekiwano: {expected_val:#x})")
+            #self.dut._log.info(f"Odczyt RAM[{addr:#x}] = {read_val:#x} (Oczekiwano: {expected_val:#x})")
             assert read_val == expected_val, \
                 f"Błąd odczytu! Adres: {addr:#x}, Odczytano: {read_val:#x}, Oczekiwano: {expected_val:#x}"
 
@@ -154,6 +144,7 @@ async def test_control_registers_readback(dut):
     ilosc_wsp = 15
     ilosc_probek = 100
 
+    #REJESTR WPS i REJESTR PROBEK -> test zapisu i odczytu
     await tester.apb.write(REG_ILE_WSP, ilosc_wsp)
     await tester.apb.write(REG_ILE_PROBEK,ilosc_probek)
 
@@ -172,28 +163,25 @@ async def test_control_registers_readback(dut):
     val_start = int.from_bytes(raw_start, byteorder='little') & 0xFFFF
     assert val_start == 0, "Błąd! Rejestr START nie wyzerował się automatycznie"
 
-    #REG_DONE
-    try:
-        await tester.apb.write(REG_DONE, 0x1234,error_expected=1)
-        dut._log.warning(f"Zapis do {hex(REG_DONE)} zakończony, sprawdzam czy dane NIE zostały zapisane")
-    except Exception as e:
-        # Jeśli cocotbext-apb wykryło PSLVERR, rzuci wyjątek
-        dut._log.info(f"Wykryto oczekiwany błąd transakcji APB na adresie {hex(REG_DONE)}: {e}")
+    #REG_DONE -> proba zapisu do read only
+    await tester.apb.write(REG_DONE, 0x1234,error_expected=1)
+    dut._log.info(f"Zapis do {hex(REG_DONE)} zakończony, sprawdzam czy dane NIE zostały zapisane")
+    # Weryfikacja: Odczytujemy i sprawdzamy czy wartość to nadal 0
+    raw_val = await tester.apb.read(REG_DONE)
+    val = int.from_bytes(raw_val, byteorder='little') & 0xFFFF
+    assert val == 0, f"Błąd! Rejestr RO pod adresem {hex(REG_DONE)} przyjął wartość!"
 
-        # Weryfikacja: Odczytujemy i sprawdzamy czy wartość to nadal 0
-        raw_val = await tester.apb.read(REG_DONE)
-        val = int.from_bytes(raw_val, byteorder='little') & 0xFFFF
-        assert val == 0, f"Błąd! Rejestr RO pod adresem {hex(REG_DONE)} przyjął wartość!"
+    #REG_PRACUJE -> proba zapisu do read only
+    await tester.apb.write(REG_PRACUJE, 0x1234,error_expected=1)
+    dut._log.info(f"Zapis do {hex(REG_PRACUJE)} zakończony, sprawdzam czy dane NIE zostały zapisane")
+    # Weryfikacja: Odczytujemy i sprawdzamy czy wartość to nadal 0
+    raw_val = await tester.apb.read(REG_PRACUJE)
+    val = int.from_bytes(raw_val, byteorder='little') & 0xFFFF
+    assert val == 0, f"Błąd! Rejestr RO pod adresem {hex(REG_PRACUJE)} przyjął wartość!" # Zakładamy, że wejścia DONE i Pracuje są w stanie 0
 
-    #REG_PRACUJE
-    try:
-        await tester.apb.write(REG_PRACUJE, 0x1234,error_expected=1)
-        dut._log.info(f"Zapis do {hex(REG_PRACUJE)} zakończony, sprawdzam czy dane NIE zostały zapisane")
-    except Exception as e:
-        # Jeśli cocotbext-apb wykryło PSLVERR, rzuci wyjątek
-        dut._log.info(f"Wykryto oczekiwany błąd transakcji APB na adresie {hex(REG_PRACUJE)}: {e}")
-
-        # Weryfikacja: Odczytujemy i sprawdzamy czy wartość to nadal 0
-        raw_val = await tester.apb.read(REG_PRACUJE)
-        val = int.from_bytes(raw_val, byteorder='little') & 0xFFFF
-        assert val == 0, f"Błąd! Rejestr RO pod adresem {hex(REG_PRACUJE)} przyjął wartość!" # Zakładamy, że wejścia DONE i Pracuje są w stanie 0
+    #ZŁY ADRES -> proba zapisu pod zly adres
+    cocotb.start_soon(tester.apb.write(0b111111, 0x1234, error_expected=1))
+    await RisingEdge(tester.dut.PCLK) 
+    await RisingEdge(tester.dut.PCLK)
+    await RisingEdge(tester.dut.PCLK)
+    assert tester.dut.PSLVERR ==1, "Brak bledu przy zlym adresie rejestru"

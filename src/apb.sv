@@ -47,14 +47,14 @@ module apb (
             
             // WRITE without wait state, T2 (access phase)
             if (PSEL && PWRITE && !PENABLE) begin
-                if(PADDR == 'h21 || PADDR == 'h22) begin //REG_DONE = 0x21, REG_PRACUJE = 0x22 
-                    PREADY <= 1'b1; //gotowy
-                    PSLVERR <= 1'b1; //BLAD zapis do rejestrow RO
-                end else begin
+                if(PADDR[5] == 'd0 || PADDR == 'h20 || PADDR == 'h23 || PADDR == 'h24) begin //zapis do ram lub tylko do 3 rejestrów
                     p_address <= PADDR[5:0];
                     p_data    <= PWDATA[15:0];
                     PREADY    <= 1'b1; //dane przyjęte
                     p_wr      <= 1'b1; //impuls zapisu
+                end else begin
+                    PREADY <= 1'b1; //gotowy
+                    PSLVERR <= 1'b1; //BLAD zapis do rejestrow RO
                 end
             end
 
