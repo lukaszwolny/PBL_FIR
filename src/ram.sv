@@ -1,3 +1,5 @@
+`timescale 1ns/1ps
+
 // jeden modul RAM z paramterami.
 
 module ram#(
