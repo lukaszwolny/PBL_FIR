@@ -9,19 +9,24 @@ PWD=$(shell pwd)
 SRC_DIR = $(PWD)/../../src
 
 # Pliki SystemVerilog z katalogu src
-VERILOG_SOURCES = $(SRC_DIR)/apb.sv
+VERILOG_SOURCES = $(SRC_DIR)/APB_main.sv
 # Dodaj inne pliki jeśli potrzebne:
-# VERILOG_SOURCES += $(SRC_DIR)/APB_main.sv
+VERILOG_SOURCES += $(SRC_DIR)/apb.sv
+VERILOG_SOURCES += $(SRC_DIR)/cdc.sv
+VERILOG_SOURCES += $(SRC_DIR)/decoder.sv
+VERILOG_SOURCES += $(SRC_DIR)/ram.sv
+VERILOG_SOURCES += $(SRC_DIR)/rejestry_ster.sv
 # VERILOG_SOURCES += $(SRC_DIR)/axi.sv
 
 # Nazwa modułu top-level w SystemVerilog
-TOPLEVEL = apb
+TOPLEVEL = APB_main
 
 # Nazwa modułu testowego Python (bez .py)
-MODULE = apb_tb
+MODULE = apb_tb2
 
 # Opcje kompilatora - flaga -g2012 dla SystemVerilog 2012
 COMPILE_ARGS = -g2012
+#COMPILE_ARGS += -timescale 1ns/1ps
 
 # Opcje symulatora
 SIM_ARGS = 
