@@ -81,11 +81,6 @@ async def top_test_1(dut):
     #apb odczyt wsp. ile_probek, ile_wsp
     data_apb = []
     await ReadOnly() 
-    # data_apb.append((await apb.read(0x00)))
-    # await ReadOnly() 
-    # data_apb.append((await apb.read(0x01)))
-    # jeden = await apb.read(0x01)
-    # print(int.from_bytes(jeden, byteorder="little", signed=True))
     data_apb.append(int.from_bytes(await apb.read(0x00), byteorder="little", signed=True))
     await ReadOnly() 
     data_apb.append(int.from_bytes(await apb.read(0x01), byteorder="little", signed=True))
