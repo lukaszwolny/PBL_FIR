@@ -5,7 +5,7 @@ sys.path.insert(0,PROJECT_ROOT)
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import RisingEdge, ReadOnly
 import random
 
 from modelFIR.model_fir import fir_hw_model
@@ -70,14 +70,43 @@ async def top_test_1(dut):
     # wsp = [16384, 16384]  #1/2 1/2
     wsp = [32767, -32768]
     write_task = cocotb.start_soon(apb.write(int(0), 32767))
-    write_task = cocotb.start_soon(apb.write(int(1), -32767))
+    write_task = cocotb.start_soon(apb.write(int(1), -32768))
     ile_wsp = 2
     # dut.u_fir.f_ile_wsp.value = ile_wsp
     #100011
     write_task = cocotb.start_soon(apb.write(int(35), ile_wsp))
     ile_razy = ile_probek + ile_wsp - 1
     # dut.u_fir.f_ile_razy.value = ile_razy #zeby nie bylo -1....
-    
+
+    #apb odczyt wsp. ile_probek, ile_wsp
+    data_apb = []
+    await ReadOnly() 
+    # data_apb.append((await apb.read(0x00)))
+    # await ReadOnly() 
+    # data_apb.append((await apb.read(0x01)))
+    # jeden = await apb.read(0x01)
+    # print(int.from_bytes(jeden, byteorder="little", signed=True))
+    data_apb.append(int.from_bytes(await apb.read(0x00), byteorder="little", signed=True))
+    await ReadOnly() 
+    data_apb.append(int.from_bytes(await apb.read(0x01), byteorder="little", signed=True))
+    #spr
+    raw = int(data_apb[0]) 
+    if raw > 32767:
+        data_apb[0] =  raw - 65536
+    raw = int(data_apb[1]) 
+    if raw > 32767:
+        data_apb[1] =  raw - 65536
+
+    assert data_apb == wsp, f"Odczytane wsp z apb {data_apb} != oczekiwana {wsp}"
+    data_apb_ile_probek = []
+    data_apb_ile_wsp = []
+    await ReadOnly() 
+    data_apb_ile_probek = (int.from_bytes(await apb.read(36), byteorder="little", signed=True))
+    await ReadOnly() 
+    data_apb_ile_wsp = (int.from_bytes(await apb.read(35), byteorder="little", signed=True))
+
+    assert data_apb_ile_probek == ile_probek, f"Odczytane ileprobek z apb {data_apb_ile_probek} != oczekiwana {ile_probek}"
+    assert data_apb_ile_wsp == ile_wsp, f"Odczytane ilewsp z apb {data_apb_ile_wsp} != oczekiwana {ile_wsp}"
 
     # AXI
     # dut.a_rst_n.value = 0
@@ -91,8 +120,16 @@ async def top_test_1(dut):
     adres = 0x0000       
     N = 5  
     # zapisane_dane = [-1000, -2000, -3000, -4000, 0, 0, 0] #probki
-    zapisane_dane = [1000, 2000, 3000, 2000, 1000, 0]
+    zapisane_dane = [1000, 2000, 3000, 2000, 1000]
     await axi.write(adres, zapisane_dane, size = 2)
+
+    #axi odczyt zapisanyc probek
+    data_spr_probek = []
+    data_spr_probek_wyn = []
+    data_spr_probek = await axi.read(adres,length=N, size = 2)
+    for x in data_spr_probek:
+        data_spr_probek_wyn.append(to_signed_16bit(x))
+    assert data_spr_probek_wyn == zapisane_dane, f"Odczytana próbka {data_spr_probek_wyn} != oczekiwana {zapisane_dane}"
 
     # APB - start
 
